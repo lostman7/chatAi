@@ -1,0 +1,23 @@
+{
+  "rag_folder": "./Flowfield",
+  "rag_ram_cap_mb": 500,
+  "rag_top_k": 5,
+  "context_tokens": {
+    "AI_A": 7000,
+    "AI_B": 4096
+  },
+  "delay_ms": 1000,
+  "max_turns": 60,
+  "reasoning_log": true,
+  "autosave_archive": true,
+  "agents": {
+    "AI_A": {
+      "provider": "lmstudio",
+      "model": "chatgpt-oss-20b"
+    },
+    "AI_B": {
+      "provider": "ollama",
+      "model": "cogito:3b"
+    }
+  }
+}
