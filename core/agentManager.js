@@ -5,6 +5,34 @@ const { getConfig } = require('./settings');
 
 const providers = JSON.parse(fs.readFileSync(path.join(__dirname, '../config/providers.json'), 'utf-8'));
 
+const FALLBACK_DIMENSIONS = 256;
+
+function fallbackEmbeddingVector(text) {
+  const vector = new Array(FALLBACK_DIMENSIONS).fill(0);
+  if (!text) {
+    return vector;
+  }
+  const tokens = text
+    .toLowerCase()
+    .match(/[\p{L}\d_-]{2,}/gu);
+  if (!tokens || !tokens.length) {
+    return vector;
+  }
+  tokens.forEach((token, tokenIndex) => {
+    let hash = 0;
+    for (let i = 0; i < token.length; i += 1) {
+      hash = (hash * 31 + token.charCodeAt(i)) >>> 0;
+    }
+    const position = hash % FALLBACK_DIMENSIONS;
+    vector[position] += 1 + (tokenIndex % 3) * 0.1;
+  });
+  const magnitude = Math.sqrt(vector.reduce((sum, value) => sum + value * value, 0));
+  if (!magnitude) {
+    return vector;
+  }
+  return vector.map((value) => value / magnitude);
+}
+
 const BASE_AGENTS = {
   AI_A: {
     name: 'Physicist',
@@ -69,19 +97,27 @@ async function sendMessage(agentKey, messages) {
 async function createEmbedding(agentKey, text) {
   const agent = getAgentProfile(agentKey);
   const provider = providers[agent.provider];
+  if (!provider || !provider.embedding_endpoint) {
+    return fallbackEmbeddingVector(text);
+  }
   const url = provider.base_url + provider.embedding_endpoint;
   const payload = agent.provider === 'ollama'
     ? { model: agent.model, input: text }
     : { model: agent.model, input: text };
-  const response = await axios.post(url, payload, { timeout: 60000 });
-  const data = response.data;
-  if (data?.data?.length) {
-    return data.data[0].embedding;
+  try {
+    const response = await axios.post(url, payload, { timeout: 60000 });
+    const data = response.data;
+    if (data?.data?.length) {
+      return data.data[0].embedding;
+    }
+    if (data?.embedding) {
+      return data.embedding;
+    }
+    console.warn('Embedding response malformed, falling back to lexical vector.');
+  } catch (err) {
+    console.warn(`Embedding call failed (${agent.provider}/${agent.model}): ${err.message}`);
   }
-  if (data?.embedding) {
-    return data.embedding;
-  }
-  throw new Error('Embedding response malformed');
+  return fallbackEmbeddingVector(text);
 }
 
 function getAgentStatus() {

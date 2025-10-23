@@ -11,12 +11,6 @@
     <div id="app">
       <header>
         <h1>🌌 TwinLine</h1>
-        <div class="controls">
-          <button id="startLoop">Start Loop</button>
-          <button id="stopLoop">Stop Loop</button>
-          <button id="buildArchive">Build Archive</button>
-          <button id="reloadModels">Reload Models</button>
-        </div>
       </header>
       <section class="model-controls">
         <div class="model-card">
@@ -56,7 +50,10 @@
           <div id="messages"></div>
           <div class="starter">
             <textarea id="starterField" placeholder="Conversation starter"></textarea>
-            <button id="setStarter">Send</button>
+            <div class="starter-actions">
+              <button id="startLoop">Start Loop</button>
+              <button id="stopLoop" class="secondary">Stop Loop</button>
+            </div>
           </div>
         </section>
         <aside class="sidebar">
@@ -76,6 +73,10 @@
             <h2>Loop</h2>
             <p>Status: <span id="loopState">Stopped</span></p>
             <p>Turn: <span id="loopTurn">0</span>/<span id="loopMax">0</span></p>
+            <div class="loop-actions">
+              <button id="buildArchive">Build Archive</button>
+              <button id="reloadModels">Reload Models</button>
+            </div>
           </div>
         </aside>
       </main>

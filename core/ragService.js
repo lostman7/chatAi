@@ -79,11 +79,34 @@ async function buildArchive(folderPath) {
 }
 
 function cosineSimilarity(a, b) {
-  const dot = a.reduce((sum, val, idx) => sum + val * b[idx], 0);
-  const magA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
-  const magB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+  if (!Array.isArray(a) || !Array.isArray(b) || !a.length || !b.length) {
+    return 0;
+  }
+  const length = Math.min(a.length, b.length);
+  let dot = 0;
+  let magA = 0;
+  let magB = 0;
+  for (let i = 0; i < length; i += 1) {
+    const ai = a[i] || 0;
+    const bi = b[i] || 0;
+    dot += ai * bi;
+    magA += ai * ai;
+    magB += bi * bi;
+  }
+  for (let i = length; i < a.length; i += 1) {
+    const ai = a[i];
+    if (typeof ai === 'number') {
+      magA += ai * ai;
+    }
+  }
+  for (let i = length; i < b.length; i += 1) {
+    const bi = b[i];
+    if (typeof bi === 'number') {
+      magB += bi * bi;
+    }
+  }
   if (!magA || !magB) return 0;
-  return dot / (magA * magB);
+  return dot / (Math.sqrt(magA) * Math.sqrt(magB));
 }
 
 async function retrieveContext(query, topK) {

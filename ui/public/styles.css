@@ -28,21 +28,6 @@ header {
   align-items: center;
 }
 
-.controls button {
-  margin-left: 0.75rem;
-  padding: 0.5rem 1rem;
-  background: rgba(148, 163, 184, 0.15);
-  border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: 0.5rem;
-  color: #e2e8f0;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.controls button:hover {
-  background: rgba(56, 189, 248, 0.35);
-}
-
 .model-controls {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -155,15 +140,42 @@ main {
   resize: vertical;
 }
 
-.starter button {
-  width: 120px;
-  margin: 1rem;
-  background: rgba(59, 130, 246, 0.4);
+.starter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  justify-content: center;
+}
+
+.starter-actions button {
+  min-width: 140px;
+  padding: 0.75rem 1rem;
   border: none;
   border-radius: 0.75rem;
-  color: #e2e8f0;
   font-weight: 600;
   cursor: pointer;
+  color: #e2e8f0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.starter-actions button#startLoop {
+  background: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.25);
+}
+
+.starter-actions button#startLoop:hover {
+  background: rgba(59, 130, 246, 0.6);
+  transform: translateY(-1px);
+}
+
+.starter-actions button.secondary {
+  background: rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.starter-actions button.secondary:hover {
+  background: rgba(148, 163, 184, 0.35);
 }
 
 .sidebar {
@@ -182,6 +194,30 @@ main {
 
 .panel h2 {
   margin-top: 0;
+}
+
+.loop-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.loop-actions button {
+  flex: 1 1 150px;
+  padding: 0.65rem 1rem;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 0.65rem;
+  color: #bae6fd;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.loop-actions button:hover {
+  background: rgba(14, 165, 233, 0.35);
+  border-color: rgba(14, 165, 233, 0.55);
 }
 
 footer {

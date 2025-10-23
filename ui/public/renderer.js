@@ -16,8 +16,20 @@ const loopStateEl = document.getElementById('loopState');
 const loopTurnEl = document.getElementById('loopTurn');
 const loopMaxEl = document.getElementById('loopMax');
 const starterField = document.getElementById('starterField');
-const setStarterBtn = document.getElementById('setStarter');
 const memoryStatusEl = document.getElementById('memoryStatus');
+let starterSaveTimeout;
+
+function setLoopControls(running) {
+  if (startLoopBtn) {
+    startLoopBtn.disabled = running;
+    startLoopBtn.textContent = running ? 'Loop Running…' : 'Start Loop';
+  }
+  if (stopLoopBtn) {
+    stopLoopBtn.disabled = !running;
+  }
+}
+
+setLoopControls(false);
 
 async function refreshStats() {
   try {
@@ -98,15 +110,30 @@ function appendMessage(turn) {
 }
 
 startLoopBtn.addEventListener('click', async () => {
+  setLoopControls(true);
   messagesEl.innerHTML = '';
-  await window.TwinLine.startConversation({ starter: starterField.value });
-  const status = await window.TwinLine.getConversationStatus();
-  loopMaxEl.textContent = status.maxTurns;
-  loopStateEl.textContent = 'Running';
+  try {
+    await window.TwinLine.setConversationStarter({ starter: starterField.value });
+    await window.TwinLine.startConversation({ starter: starterField.value });
+    const status = await window.TwinLine.getConversationStatus();
+    loopMaxEl.textContent = status.maxTurns;
+    loopStateEl.textContent = 'Running';
+  } catch (err) {
+    console.error(err);
+    alert(err.message || 'Failed to start loop');
+    setLoopControls(false);
+  }
 });
 
 stopLoopBtn.addEventListener('click', async () => {
-  await window.TwinLine.stopConversation();
+  stopLoopBtn.disabled = true;
+  try {
+    await window.TwinLine.stopConversation();
+  } catch (err) {
+    console.error(err);
+    alert(err.message || 'Failed to stop loop');
+    setLoopControls(false);
+  }
 });
 
 buildArchiveBtn.addEventListener('click', async () => {
@@ -163,8 +190,13 @@ saveAgentModelsBtn?.addEventListener('click', async () => {
   }
 });
 
-setStarterBtn.addEventListener('click', async () => {
-  await window.TwinLine.setConversationStarter({ starter: starterField.value });
+starterField.addEventListener('input', () => {
+  if (starterSaveTimeout) {
+    clearTimeout(starterSaveTimeout);
+  }
+  starterSaveTimeout = setTimeout(() => {
+    window.TwinLine.setConversationStarter({ starter: starterField.value });
+  }, 400);
 });
 
 window.TwinLine.onLoopUpdate((event) => {
@@ -176,13 +208,16 @@ window.TwinLine.onLoopUpdate((event) => {
     loopStateEl.textContent = 'Running';
     loopTurnEl.textContent = event.status.currentTurn;
     loopMaxEl.textContent = event.status.maxTurns;
+    setLoopControls(true);
   }
   if (event.type === 'loop-finished' || event.type === 'loop-stopped') {
     loopStateEl.textContent = 'Stopped';
+    setLoopControls(false);
   }
   if (event.type === 'loop-error') {
     loopStateEl.textContent = 'Error';
     alert(event.message);
+    setLoopControls(false);
   }
 });
 
@@ -196,4 +231,8 @@ refreshAgents();
 populateModelControls();
 window.TwinLine.getConversationStatus().then((status) => {
   loopMaxEl.textContent = status.maxTurns;
+  if (status.starter) {
+    starterField.value = status.starter;
+  }
+  setLoopControls(status.running);
 });

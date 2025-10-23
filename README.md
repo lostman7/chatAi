@@ -39,7 +39,15 @@ TwinLine is a dual-agent conversation arena with an integrated FlowChunker subsy
 5. **Adjust agent models (optional)**
 
    - Use the "Physicist Model" and "Validator Model" cards at the top of the app to choose providers (`lmstudio` or `ollama`) and set custom model identifiers.
-   - Click **Apply Models** to persist the selection to `config/config.json`; use **Reload Models** if you need to refresh embeddings after a change.
+   - Click **Apply Models** to persist the selection to `config/config.json`; use **Reload Models** (bottom of the Loop panel) if you need to refresh embeddings after a change.
+
+6. **Start the conversation loop**
+
+   - Type an optional conversation starter in the text area at the bottom of the chat window (the value autosaves while you type).
+   - Press **Start Loop** to kick off the alternating Physicist ⇄ Validator exchange; **Stop Loop** sits beside it for quick aborts.
+   - Build archives and reload models from the actions anchored under the Loop status card in the sidebar.
+
+> ℹ️  The development build opens Chromium Developer Tools automatically so you can inspect network calls—this is expected and can be closed if you don’t need it.
 
 ## FlowChunker CLI
 
@@ -54,6 +62,8 @@ python3 flowchunker/flowchunker.py --folder ./Flowfield
 - Conversation transcripts: `logs/conversations/session_<timestamp>.jsonl`
 - Reasoning traces: `logs/reasoning/YYYY-MM-DD.jsonl`
 - Optional archive mirrors: `archives/flowfield_<timestamp>.jsonl`
+
+TwinLine automatically falls back to an internal lexical embedding when a provider’s `/embeddings` endpoint is unavailable (e.g., LM Studio without an embedding model loaded), so loop runs continue even if a remote request returns `404` or times out.
 
 ## License
 

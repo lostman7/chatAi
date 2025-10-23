@@ -105,8 +105,8 @@ async function runLoop(config) {
     try {
       responseText = await sendMessage(agentKey, messages);
     } catch (err) {
-      responseText = `Error contacting provider: ${err.message}`;
-      console.error(err);
+      responseText = `Error contacting ${agent.provider}/${agent.model}: ${err.message}`;
+      console.error('Agent call failed', err);
     }
 
     const turnRecord = {
