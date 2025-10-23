@@ -53,8 +53,8 @@ const BASE_AGENTS = {
 };
 
 const agentStatus = {
-  AI_A: { loaded: false, lastResponse: null },
-  AI_B: { loaded: false, lastResponse: null }
+  AI_A: { loaded: false, lastResponse: null, reachable: null, lastCheck: null, lastError: null },
+  AI_B: { loaded: false, lastResponse: null, reachable: null, lastCheck: null, lastError: null }
 };
 
 function getAgentProfile(agentKey) {
@@ -67,6 +67,19 @@ function getAgentProfile(agentKey) {
   return { ...base, ...overrides };
 }
 
+function describeAxiosError(err) {
+  if (err.response) {
+    return `${err.response.status} ${err.response.statusText || 'Response'}${err.response.data?.error?.message ? ` — ${err.response.data.error.message}` : ''}`;
+  }
+  if (err.code === 'ECONNREFUSED') {
+    return 'Connection refused — ensure the provider service is running and reachable.';
+  }
+  if (err.code === 'ECONNABORTED') {
+    return 'Request timed out — provider did not respond in time.';
+  }
+  return err.message || 'Unknown provider error';
+}
+
 async function sendMessage(agentKey, messages) {
   const agent = getAgentProfile(agentKey);
   const provider = providers[agent.provider];
@@ -77,7 +90,18 @@ async function sendMessage(agentKey, messages) {
     ? { model: agent.model, messages }
     : { model: agent.model, messages, stream: false };
 
-  const response = await axios.post(url, payload, { timeout: 60000 });
+  let response;
+  try {
+    response = await axios.post(url, payload, { timeout: 60000 });
+  } catch (err) {
+    agentStatus[agentKey] = {
+      ...agentStatus[agentKey],
+      reachable: false,
+      lastCheck: new Date().toISOString(),
+      lastError: describeAxiosError(err)
+    };
+    throw new Error(describeAxiosError(err));
+  }
   const data = response.data;
   let text;
   if (data?.choices?.length) {
@@ -90,8 +114,41 @@ async function sendMessage(agentKey, messages) {
   if (typeof text !== 'string') {
     text = JSON.stringify(data);
   }
-  agentStatus[agentKey] = { loaded: true, lastResponse: new Date().toISOString() };
+  agentStatus[agentKey] = {
+    loaded: true,
+    lastResponse: new Date().toISOString(),
+    reachable: true,
+    lastCheck: new Date().toISOString(),
+    lastError: null
+  };
   return text.trim();
+}
+
+async function pingAgent(agentKey) {
+  const agent = getAgentProfile(agentKey);
+  const provider = providers[agent.provider];
+  if (!provider) throw new Error(`Unknown provider ${agent.provider}`);
+
+  const method = (provider.ping_method || 'get').toLowerCase();
+  const url = provider.base_url + (provider.ping_endpoint || '/models');
+  try {
+    const response = await axios({ method, url, timeout: 5000 });
+    agentStatus[agentKey] = {
+      ...agentStatus[agentKey],
+      reachable: true,
+      lastCheck: new Date().toISOString(),
+      lastError: null
+    };
+    return { ok: true, status: response.status };
+  } catch (err) {
+    agentStatus[agentKey] = {
+      ...agentStatus[agentKey],
+      reachable: false,
+      lastCheck: new Date().toISOString(),
+      lastError: describeAxiosError(err)
+    };
+    return { ok: false, message: describeAxiosError(err) };
+  }
 }
 
 async function createEmbedding(agentKey, text) {
@@ -134,5 +191,6 @@ module.exports = {
   getAgentProfile,
   sendMessage,
   createEmbedding,
-  getAgentStatus
+  getAgentStatus,
+  pingAgent
 };

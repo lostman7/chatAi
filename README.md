@@ -10,6 +10,8 @@ TwinLine is a dual-agent conversation arena with an integrated FlowChunker subsy
 - Reasoning log capture saved to JSONL files per day
 - Timestamped conversation transcripts for auditing and analysis
 - Inline agent model switcher for quickly swapping LM Studio/Ollama model pairs
+- One-click agent connectivity tests with live status lights in the sidebar
+- Conversation starters inject directly into the Physicist’s first turn for rapid prompts
 
 ## Getting Started
 
@@ -39,13 +41,14 @@ TwinLine is a dual-agent conversation arena with an integrated FlowChunker subsy
 5. **Adjust agent models (optional)**
 
    - Use the "Physicist Model" and "Validator Model" cards at the top of the app to choose providers (`lmstudio` or `ollama`) and set custom model identifiers.
-   - Click **Apply Models** to persist the selection to `config/config.json`; use **Reload Models** (bottom of the Loop panel) if you need to refresh embeddings after a change.
+   - Click **Apply Models** in the Agents panel to persist the selection to `config/config.json`; keep **Reload Models** nearby if you need to refresh embeddings after a change.
+   - Tap the **Test Agent** buttons beside each persona to verify the configured provider/model is responding before you start a loop.
 
 6. **Start the conversation loop**
 
-   - Type an optional conversation starter in the text area at the bottom of the chat window (the value autosaves while you type).
+   - Type an optional conversation starter in the text area at the bottom of the chat window (the value autosaves while you type). The text you enter is dispatched to the Physicist immediately when the loop launches, so you can seed the discussion with a human directive.
    - Press **Start Loop** to kick off the alternating Physicist ⇄ Validator exchange; **Stop Loop** sits beside it for quick aborts.
-   - Build archives and reload models from the actions anchored under the Loop status card in the sidebar.
+   - Rebuild the FlowChunker archive from the FlowChunker card in the sidebar whenever your source files change.
 
 > ℹ️  The development build opens Chromium Developer Tools automatically so you can inspect network calls—this is expected and can be closed if you don’t need it.
 

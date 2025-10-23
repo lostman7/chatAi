@@ -38,11 +38,28 @@ async function startConversationLoop(reasoningLogger) {
   const config = getConfig();
   loopRunning = true;
   currentTurn = 0;
-  conversationHistory = [];
+  const starter = (conversationStarter || '').trim();
+  conversationStarter = starter;
+  conversationHistory = starter ? [{ agent: 'USER', message: starter }] : [];
   reasoningLoggerRef = reasoningLogger;
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   conversationLogPath = path.join(__dirname, `../logs/conversations/session_${timestamp}.jsonl`);
+  fs.mkdirSync(path.dirname(conversationLogPath), { recursive: true });
+
+  if (starter) {
+    const starterRecord = {
+      turn_number: 0,
+      sender: 'Conversation Starter',
+      agent: 'USER',
+      message: starter,
+      reasoning_trace: [],
+      context_used: [],
+      retrievals: []
+    };
+    fs.appendFileSync(conversationLogPath, JSON.stringify(starterRecord) + '\n');
+    broadcast({ type: 'new-message', payload: starterRecord });
+  }
 
   broadcast({ type: 'loop-started', status: getLoopStatus() });
   runLoop(config).catch((err) => {

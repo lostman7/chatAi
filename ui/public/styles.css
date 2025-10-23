@@ -34,8 +34,7 @@ header {
   gap: 1rem;
 }
 
-.model-card,
-.model-actions {
+.model-card {
   background: rgba(15, 23, 42, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 0.75rem;
@@ -67,12 +66,8 @@ header {
   color: inherit;
 }
 
-.model-actions {
-  justify-content: flex-end;
-}
-
 #saveAgentModels {
-  align-self: flex-end;
+  align-self: stretch;
   padding: 0.75rem 1.25rem;
   background: rgba(34, 197, 94, 0.4);
   border: 1px solid rgba(34, 197, 94, 0.5);
@@ -196,28 +191,115 @@ main {
   margin-top: 0;
 }
 
-.loop-actions {
-  margin-top: 1rem;
+.agent-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
 }
 
-.loop-actions button {
+.agent-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.agent-meta .state {
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.status-light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.status-light.ok {
+  background: rgba(34, 197, 94, 0.65);
+  border-color: rgba(34, 197, 94, 0.9);
+}
+
+.status-light.error {
+  background: rgba(239, 68, 68, 0.65);
+  border-color: rgba(239, 68, 68, 0.9);
+}
+
+.status-light.checking {
+  background: rgba(59, 130, 246, 0.55);
+  border-color: rgba(59, 130, 246, 0.8);
+}
+
+.status-light.unknown {
+  background: rgba(148, 163, 184, 0.35);
+  border-color: rgba(148, 163, 184, 0.55);
+}
+
+.test-agent {
+  background: rgba(59, 130, 246, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  color: #bfdbfe;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.test-agent:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.45);
+}
+
+.test-agent:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.agent-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.agent-actions button {
   flex: 1 1 150px;
+}
+
+.agent-actions .secondary {
+  background: rgba(148, 163, 184, 0.2);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #e2e8f0;
+}
+
+.agent-actions .secondary:hover {
+  background: rgba(148, 163, 184, 0.35);
+}
+
+.flow-actions {
+  margin-top: 0.75rem;
+}
+
+.flow-actions button {
+  width: 100%;
   padding: 0.65rem 1rem;
   background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  border: 1px solid rgba(45, 212, 191, 0.45);
   border-radius: 0.65rem;
-  color: #bae6fd;
+  color: #5eead4;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.loop-actions button:hover {
-  background: rgba(14, 165, 233, 0.35);
-  border-color: rgba(14, 165, 233, 0.55);
+.flow-actions button:hover {
+  background: rgba(45, 212, 191, 0.35);
+  border-color: rgba(45, 212, 191, 0.6);
 }
 
 footer {

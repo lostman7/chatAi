@@ -3,7 +3,7 @@ const path = require('path');
 const { ensureSettingsLoaded, getConfig, updateConfig } = require('./settings');
 const { startConversationLoop, stopConversationLoop, getLoopStatus, setConversationStarter } = require('./conversationEngine');
 const { getFlowStats, buildArchive, retrieveContext, reloadModels } = require('./ragService');
-const { getAgentStatus } = require('./agentManager');
+const { getAgentStatus, pingAgent } = require('./agentManager');
 const { ReasoningLogger } = require('./logger');
 
 let mainWindow;
@@ -63,6 +63,7 @@ ipcMain.handle('flow:retrieve', async (_event, payload) => {
 
 ipcMain.handle('flow:stats', async () => getFlowStats());
 ipcMain.handle('agents:status', async () => getAgentStatus());
+ipcMain.handle('agents:ping', async (_event, agentKey) => pingAgent(agentKey));
 
 ipcMain.handle('conversation:start', async (_event, payload) => {
   if (payload?.starter) setConversationStarter(payload.starter);

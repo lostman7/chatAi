@@ -12,12 +12,45 @@ const ragInfoEl = document.getElementById('ragInfo');
 const ragRetrievalEl = document.getElementById('ragRetrieval');
 const agentAEl = document.getElementById('agentA').querySelector('.state');
 const agentBEl = document.getElementById('agentB').querySelector('.state');
+const agentLights = {
+  AI_A: document.querySelector('[data-agent-light="AI_A"]'),
+  AI_B: document.querySelector('[data-agent-light="AI_B"]')
+};
+const agentNames = { AI_A: 'Physicist', AI_B: 'Validator' };
+const agentTestButtons = document.querySelectorAll('.test-agent');
 const loopStateEl = document.getElementById('loopState');
 const loopTurnEl = document.getElementById('loopTurn');
 const loopMaxEl = document.getElementById('loopMax');
 const starterField = document.getElementById('starterField');
 const memoryStatusEl = document.getElementById('memoryStatus');
 let starterSaveTimeout;
+
+const LIGHT_STATES = ['ok', 'error', 'unknown', 'checking'];
+
+function setAgentLight(agentKey, { reachable, lastCheck, lastError } = {}) {
+  const el = agentLights[agentKey];
+  if (!el) return;
+  el.classList.remove(...LIGHT_STATES);
+  let title = 'Status unknown';
+  if (reachable === true) {
+    el.classList.add('ok');
+    title = lastCheck ? `Reachable (checked ${new Date(lastCheck).toLocaleTimeString()})` : 'Reachable';
+  } else if (reachable === false) {
+    el.classList.add('error');
+    title = lastError || 'Provider unreachable';
+  } else {
+    el.classList.add('unknown');
+  }
+  el.setAttribute('title', title);
+}
+
+function setAgentLightChecking(agentKey) {
+  const el = agentLights[agentKey];
+  if (!el) return;
+  el.classList.remove(...LIGHT_STATES);
+  el.classList.add('checking');
+  el.setAttribute('title', 'Checking connectivity…');
+}
 
 function setLoopControls(running) {
   if (startLoopBtn) {
@@ -46,14 +79,17 @@ async function refreshStats() {
 async function refreshAgents() {
   try {
     const agents = await window.TwinLine.getAgentStatus();
-    const agentAText = agents.AI_A.provider && agents.AI_A.model
+    if (!agents) return;
+    const agentAText = agents.AI_A?.provider && agents.AI_A?.model
       ? `${agents.AI_A.loaded ? 'Loaded' : 'Idle'} • ${agents.AI_A.provider}/${agents.AI_A.model}`
-      : (agents.AI_A.loaded ? 'Loaded' : 'Idle');
-    const agentBText = agents.AI_B.provider && agents.AI_B.model
+      : (agents.AI_A?.loaded ? 'Loaded' : 'Idle');
+    const agentBText = agents.AI_B?.provider && agents.AI_B?.model
       ? `${agents.AI_B.loaded ? 'Loaded' : 'Idle'} • ${agents.AI_B.provider}/${agents.AI_B.model}`
-      : (agents.AI_B.loaded ? 'Loaded' : 'Idle');
+      : (agents.AI_B?.loaded ? 'Loaded' : 'Idle');
     agentAEl.textContent = agentAText;
     agentBEl.textContent = agentBText;
+    setAgentLight('AI_A', agents.AI_A);
+    setAgentLight('AI_B', agents.AI_B);
   } catch (err) {
     console.error(err);
   }
@@ -112,6 +148,8 @@ function appendMessage(turn) {
 startLoopBtn.addEventListener('click', async () => {
   setLoopControls(true);
   messagesEl.innerHTML = '';
+  loopStateEl.textContent = 'Starting…';
+  loopTurnEl.textContent = '0';
   try {
     await window.TwinLine.setConversationStarter({ starter: starterField.value });
     await window.TwinLine.startConversation({ starter: starterField.value });
@@ -127,6 +165,7 @@ startLoopBtn.addEventListener('click', async () => {
 
 stopLoopBtn.addEventListener('click', async () => {
   stopLoopBtn.disabled = true;
+  loopStateEl.textContent = 'Stopping…';
   try {
     await window.TwinLine.stopConversation();
   } catch (err) {
@@ -154,6 +193,31 @@ buildArchiveBtn.addEventListener('click', async () => {
 reloadModelsBtn.addEventListener('click', async () => {
   await window.TwinLine.reloadModels();
   refreshAgents();
+});
+
+agentTestButtons.forEach((button) => {
+  button.addEventListener('click', async () => {
+    const agentKey = button.dataset.agent;
+    if (!agentKey) return;
+    const originalLabel = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Testing…';
+    setAgentLightChecking(agentKey);
+    try {
+      const result = await window.TwinLine.pingAgent(agentKey);
+      if (result?.ok) {
+        alert(`${agentNames[agentKey] || agentKey} is reachable (status ${result.status}).`);
+      } else {
+        alert(`Ping failed: ${result?.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      alert(`Ping failed: ${err.message}`);
+    } finally {
+      button.disabled = false;
+      button.textContent = originalLabel;
+      refreshAgents();
+    }
+  });
 });
 
 saveAgentModelsBtn?.addEventListener('click', async () => {

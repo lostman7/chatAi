@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('TwinLine', {
   retrieveContext: (payload) => ipcRenderer.invoke('flow:retrieve', payload),
   getFlowStats: () => ipcRenderer.invoke('flow:stats'),
   getAgentStatus: () => ipcRenderer.invoke('agents:status'),
+  pingAgent: (agentKey) => ipcRenderer.invoke('agents:ping', agentKey),
   startConversation: (payload) => ipcRenderer.invoke('conversation:start', payload),
   stopConversation: () => ipcRenderer.invoke('conversation:stop'),
   setConversationStarter: (payload) => ipcRenderer.invoke('conversation:setStarter', payload),
