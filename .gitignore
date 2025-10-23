@@ -1,0 +1,8 @@
+node_modules
+ui/node_modules
+.DS_Store
+/dist
+/ui/dist
+logs/conversations/*.jsonl
+logs/reasoning/*.jsonl
+archives/*.jsonl

@@ -1,0 +1,87 @@
+const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
+const providers = JSON.parse(fs.readFileSync(path.join(__dirname, '../config/providers.json'), 'utf-8'));
+
+const AGENTS = {
+  AI_A: {
+    name: 'Physicist',
+    provider: 'lmstudio',
+    model: 'chatgpt-oss-20b',
+    context_window: 7000,
+    role: 'Lead Flowfield theorist and creative system designer.',
+    system_prompt: 'You are the lead physicist investigating the Flowfield Hypothesis — develop and refine theories using archived notes, RAG context, and logical synthesis.'
+  },
+  AI_B: {
+    name: 'Validator',
+    provider: 'ollama',
+    model: 'cogito:3b',
+    context_window: 4096,
+    role: 'Analytical assistant and validator.',
+    system_prompt: 'You are an analytical AI helping the Physicist validate theories. Check logic, math, and consistency. Be supportive, curious, and concise.'
+  }
+};
+
+const agentStatus = {
+  AI_A: { loaded: false, lastResponse: null },
+  AI_B: { loaded: false, lastResponse: null }
+};
+
+async function sendMessage(agentKey, messages) {
+  const agent = AGENTS[agentKey];
+  const provider = providers[agent.provider];
+  if (!provider) throw new Error(`Unknown provider ${agent.provider}`);
+
+  const url = provider.base_url + provider.chat_endpoint;
+  const payload = agent.provider === 'ollama'
+    ? { model: agent.model, messages }
+    : { model: agent.model, messages, stream: false };
+
+  const response = await axios.post(url, payload, { timeout: 60000 });
+  const data = response.data;
+  let text;
+  if (data?.choices?.length) {
+    text = data.choices[0].message?.content || data.choices[0].text;
+  } else if (data?.message) {
+    text = data.message?.content || data.message;
+  } else if (data?.response) {
+    text = data.response;
+  }
+  if (typeof text !== 'string') {
+    text = JSON.stringify(data);
+  }
+  agentStatus[agentKey] = { loaded: true, lastResponse: new Date().toISOString() };
+  return text.trim();
+}
+
+async function createEmbedding(agentKey, text) {
+  const agent = AGENTS[agentKey];
+  const provider = providers[agent.provider];
+  const url = provider.base_url + provider.embedding_endpoint;
+  const payload = agent.provider === 'ollama'
+    ? { model: agent.model, input: text }
+    : { model: agent.model, input: text };
+  const response = await axios.post(url, payload, { timeout: 60000 });
+  const data = response.data;
+  if (data?.data?.length) {
+    return data.data[0].embedding;
+  }
+  if (data?.embedding) {
+    return data.embedding;
+  }
+  throw new Error('Embedding response malformed');
+}
+
+function getAgentStatus() {
+  return {
+    AI_A: { ...agentStatus.AI_A, name: AGENTS.AI_A.name },
+    AI_B: { ...agentStatus.AI_B, name: AGENTS.AI_B.name }
+  };
+}
+
+module.exports = {
+  AGENTS,
+  sendMessage,
+  createEmbedding,
+  getAgentStatus
+};

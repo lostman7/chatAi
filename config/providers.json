@@ -1,0 +1,12 @@
+{
+  "lmstudio": {
+    "base_url": "http://localhost:1234/v1",
+    "chat_endpoint": "/chat/completions",
+    "embedding_endpoint": "/embeddings"
+  },
+  "ollama": {
+    "base_url": "http://localhost:11434/api",
+    "chat_endpoint": "/chat",
+    "embedding_endpoint": "/embeddings"
+  }
+}
