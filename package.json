@@ -1,0 +1,28 @@
+{
+  "name": "twinline",
+  "version": "1.0.0",
+  "description": "TwinLine dual-agent collaboration desktop app with FlowChunker subsystem",
+  "main": "core/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "flowchunker": "python3 flowchunker/flowchunker.py"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "chokidar": "^3.5.3",
+    "electron-store": "^8.1.0",
+    "express": "^4.19.2",
+    "fast-json-stringify": "^5.8.0",
+    "lowdb": "^7.0.1",
+    "node-fetch": "^3.3.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "^29.3.0",
+    "electron-builder": "^24.9.1"
+  }
+}

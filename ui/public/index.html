@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TwinLine</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>🌌 TwinLine</h1>
+        <div class="controls">
+          <button id="startLoop">Start Loop</button>
+          <button id="stopLoop">Stop Loop</button>
+          <button id="buildArchive">Build Archive</button>
+          <button id="reloadModels">Reload Models</button>
+        </div>
+      </header>
+      <main>
+        <section class="chat">
+          <div id="messages"></div>
+          <div class="starter">
+            <textarea id="starterField" placeholder="Conversation starter"></textarea>
+            <button id="setStarter">Send</button>
+          </div>
+        </section>
+        <aside class="sidebar">
+          <div class="panel" id="agentStatus">
+            <h2>Agents</h2>
+            <ul>
+              <li id="agentA">🧠 Physicist: <span class="state">Idle</span></li>
+              <li id="agentB">⚙️ Validator: <span class="state">Idle</span></li>
+            </ul>
+          </div>
+          <div class="panel" id="ragStatus">
+            <h2>FlowChunker</h2>
+            <p>📚 RAG: <span id="ragInfo">0 chunks | 0 MB used</span></p>
+            <p>Last retrieval: <span id="ragRetrieval">—</span></p>
+          </div>
+          <div class="panel" id="loopStatus">
+            <h2>Loop</h2>
+            <p>Status: <span id="loopState">Stopped</span></p>
+            <p>Turn: <span id="loopTurn">0</span>/<span id="loopMax">0</span></p>
+          </div>
+        </aside>
+      </main>
+      <footer>
+        <small>Reasoning Log: <span id="reasoningStatus">ON</span> • Memory Archive: <span id="memoryStatus">Inactive</span></small>
+      </footer>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html>
